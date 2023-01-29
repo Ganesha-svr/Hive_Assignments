@@ -41,16 +41,50 @@ load data inpath '/tmp/hive_class/sales_order_data.csv' into table sales_order_c
 alter table sales_order_csv set tblproperties("skip.header.line.count"="1");
 
 5. Create an internal hive table which will store data in ORC format "sales_order_orc"
+hive> create table sales_order_orc
+     (
+     ORDERNUMBER STRING,
+     QUANTITYORDERED int,
+     PRICEEACH float,
+     ORDERLINENUMBER int,
+     SALES int,
+     STATUS string,
+     QTR_ID int,
+     MONTH_ID int,
+     YEAR_ID int,
+     PRODUCTLINE string,
+     MSRP int,
+     PRODUCTCODE string,
+     PHONE string,
+     CITY string,
+     STATE string,
+     POSTALCODE int,
+     COUNTRY string,
+     TERRITORY string,
+     CONTACTLASTNAME string,
+     CONTACTFIRSTNAME string,
+     DEALSIZE string
+     )
+stored as orc;
 
 6. Load data from "sales_order_csv" into "sales_order_orc"
+hive> insert into table sales_order_orc select * from sales_order_csv;
 
 
 Perform below menioned queries on "sales_order_orc" table :
 
 a. Calculatye total sales per year
+hive> select year_id,sum(sales) as Total_Sales from sales_order_orc group by year_id;
+
 b. Find a product for which maximum orders were placed
+hive> select sum(quantityordered) as Total_Quantity_Ordered,productline from sales_order_orc group by productline limit 1;
+
 c. Calculate the total sales for each quarter
+hive> select year_id,qtr_id,sum(sales) as Total_Quarterly_Sales  from sales_order_orc group by year_id, qtr_id;
+
 d. In which quarter sales was minimum
+hive> select collect_set(year_id)[0],collect_set(qtr_id)[0],MIN(Total_Minimum_qtr_sales)as Qtr_Min_Sales from(select s.year_id, s.qtr_id,sum(s.sales)as Total_Minimum_qtr_sales from sales_order_orc s group by s.year_id, s.qtr_id) TQS;
+
 e. In which country sales was maximum and in which country sales was minimum
 f. Calculate quartelry sales for each city
 h. Find a month for each year in which maximum number of quantities were sold
