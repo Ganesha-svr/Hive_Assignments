@@ -86,5 +86,12 @@ d. In which quarter sales was minimum
 hive> select collect_set(year_id)[0],collect_set(qtr_id)[0],MIN(Total_Minimum_qtr_sales)as Qtr_Min_Sales from(select s.year_id, s.qtr_id,sum(s.sales)as Total_Minimum_qtr_sales from sales_order_orc s group by s.year_id, s.qtr_id) TQS;
 
 e. In which country sales was maximum and in which country sales was minimum
+hive> SELECT COUNTRY,sum(Sales)as maximum_sales from sales_order_orc group by country order by maximum_sales desc limit 1;
+hive> SELECT COUNTRY,sum(Sales)as minimum_sales from sales_order_orc group by country order by minimum_sales asc limit 1;
+
 f. Calculate quartelry sales for each city
+select city,qtr_id,sum(sales) from sales_order_orc group by city,qtr_id;
+
 h. Find a month for each year in which maximum number of quantities were sold
+
+hive> select year_id,month_id,totquant,quant_pos from(select year_id,month_id,sum(quantityordered) as totquant,row_number() over(partition by year_id) as quant_pos from sales_order_orc group by year_id,month_id order by totquant desc) df where quant_pos=1;
